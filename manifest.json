@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "chrome extension",
+  "description": "Runs a script when the user clicks the action toolbar icon.",
+  "version": "1.0",
+  "permissions": ["scripting", "activeTab"],
+  "host_permissions": ["*://openrouter.ai/*"],
+  "content_scripts": [
+    {
+        "matches": ["*://*.nytimes.com/*"],
+        "js": ["./scripts/contentScript.js"],
+        "css": ["./css/styles.css"]
+    }
+  ],
+  "background": {
+    "service_worker": "./scripts/background.js"
+  },
+  "icons": {
+    "16": "image.png"
+  },
+  "action": {
+    "default_title": "chrome extension",
+    "default_popup": "popup.html"
+  }
+}
