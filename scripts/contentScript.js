@@ -1,76 +1,39 @@
-// // Remove annoying overlays/popups
-// const annoyingSelectors = ['.popup', '.modal', '.overlay', '#paywall', '[id*="subscribe"]'];
-// annoyingSelectors.forEach(sel => {
-//   document.querySelectorAll(sel).forEach(el => el.remove());
-// });
+// Ask user before generating a summary
+if (confirm("News too long? Want me to summarize it for you?")) {
 
-// // Run Readability
-// setTimeout(() => {
-//   try {
-//     const article = new Readability(document).parse();
+    // Remove popups
+    const annoyingSelectors = ['.popup', '.modal', '.overlay', '#paywall', '[id*="subscribe"]'];
+    annoyingSelectors.forEach(sel => {
+        document.querySelectorAll(sel).forEach(el => el.remove());
+    });
 
-//     console.log('%cArticle Title:', 'color: green; font-weight: bold;', article.title);
-//     console.log('%cContent:', 'color: blue;', article.textContent);
+    // Wait 2 seconds for the page to settle
+    setTimeout(() => {
+        try {
+            // Make a clone of the DOM so original page remains untouched
+            const documentClone = document.cloneNode(true);
+            const articleObj = new Readability(documentClone).parse();
 
-//     // You could also show it in a modal or download it if you want
-//     alert("Article scraped: " + article.title);
-//   } catch (err) {
-//     console.error("Failed to parse article:", err);
-//   }
-// }, 1000); // wait a bit in case page hasn't fully loaded
+            //console.log('%cArticle Title:', 'color: green; font-weight: bold;', article.title);
+            //console.log('%cArticle Content:', 'color: blue;', article.textContent);
 
+            // Intead of displaying the contents in the console, I'm sending them in a prompt for summary
+            chrome.runtime.sendMessage(
+                {
+                    type: "summarizeContent",
+                    content: articleObj.textContent
+                },
+                (response) => {
+                    console.log("News Summary:", response.summary);
+                    alert(response.summary);
+                }
+            );
 
-
-// // 1. Remove annoying popups (non-destructive)
-// const annoyingSelectors = ['.popup', '.modal', '.overlay', '#paywall', '[id*="subscribe"]'];
-// annoyingSelectors.forEach(sel => {
-//   document.querySelectorAll(sel).forEach(el => el.remove());
-// });
-
-// // 2. Wait a bit to ensure page is loaded
-// setTimeout(() => {
-//   try {
-//     // ✅ Clone the DOM instead of parsing the live document
-//     const clonedDocument = document.cloneNode(true);
-//     const article = new Readability(clonedDocument).parse();
-
-//     // Log the extracted content to the console
-//     console.log('%c✅ Article Title:', 'color: green; font-weight: bold;', article.title);
-//     console.log('%c📝 Article Content:', 'color: blue;', article.textContent);
-
-//   } catch (err) {
-//     console.error("Failed to parse article:", err);
-//     alert("Failed to extract article");
-//   }
-// }, 1500); // Adjust wait time as needed
-
-
-
-// Ask user before scraping
-if (confirm("📰 Do you want to scrape this article content?")) {
-
-  // 1. Remove popups (optional)
-  const annoyingSelectors = ['.popup', '.modal', '.overlay', '#paywall', '[id*="subscribe"]'];
-  annoyingSelectors.forEach(sel => {
-    document.querySelectorAll(sel).forEach(el => el.remove());
-  });
-
-  // 2. Wait a bit for the page to settle
-  setTimeout(() => {
-    try {
-      // ✅ Clone the DOM so original page remains untouched
-      const clonedDocument = document.cloneNode(true);
-      const article = new Readability(clonedDocument).parse();
-
-      // ✅ Log the result in the DevTools Console
-      console.log('%c✅ Article Title:', 'color: green; font-weight: bold;', article.title);
-      console.log('%c📝 Article Content:', 'color: blue;', article.textContent);
-
-    } catch (err) {
-      console.error("❌ Failed to extract article:", err);
-    }
-  }, 1500);
+        } catch (err) {
+            console.error("Failed to extract article:", err);
+        }
+    }, 2000);
 
 } else {
-  console.log("🚫 Scraping canceled by user.");
+    console.log("Article content scraping canceled by user.");
 }
