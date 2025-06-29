@@ -45,5 +45,5 @@ if (confirm("News too long? Want me to summarize it for you?")) {
     }, 2000);
 
 } else {
-    alert("Article content scraping canceled by user.");
+    console.log("Article content scraping canceled by user.");
 }

@@ -8,7 +8,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       try {
         console.log("Received summarization request");
         const summary = await getLlamaSummary(request.content);
-        //console.log("Summary generated:", summary);
         sendResponse({ success: true, summary });
       } catch (error) {
         //console.error("Error during summarization:", error);
