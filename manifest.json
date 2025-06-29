@@ -3,7 +3,7 @@
   "name": "chrome extension",
   "description": "Runs a script when the user clicks the action toolbar icon.",
   "version": "1.0",
-  "permissions": ["scripting", "activeTab", "storage"],
+  "permissions": ["scripting", "activeTab", "storage", "tabs"],
   "host_permissions": [
     "https://openrouter.ai/*", 
      "https://api.openrouter.ai/*",
@@ -13,7 +13,8 @@
   "content_scripts": [
     {
         "matches": ["*://*.livemint.com/*", "*://*.nytimes.com/*"],
-        "js": ["./scripts/contentScript.js", "./scripts/Readability.js"]
+        "js": ["./scripts/contentScript.js", "./scripts/Readability.js"],
+        "run_at": "document_idle"
     }
   ],
   "background": {
@@ -25,5 +26,11 @@
   },
   "action": {
     "default_title": "chrome extension"
-  }
+  }, 
+  "web_accessible_resources": [
+    {
+      "resources": ["popup.html"],
+      "matches": ["<all_urls>"]
+    }
+  ]
 }

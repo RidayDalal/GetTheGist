@@ -24,16 +24,26 @@ if (confirm("News too long? Want me to summarize it for you?")) {
                     content: articleObj.textContent
                 },
                 (response) => {
-                    console.log("News Summary:", response.summary);
-                    alert(response.summary);
+                    // console.log("News Summary:", response.summary);
+                    // alert(response.summary);
+
+                    if (response && response.summary) {
+                        chrome.storage.local.set(
+                            {articleSummary: response.summary}, 
+                            () => {
+                            chrome.runtime.sendMessage({type: "openPopupPage"});
+                        });
+                    } else {
+                        alert("Failed to generate summary!");
+                    }
                 }
             );
 
         } catch (err) {
-            console.error("Failed to extract article:", err);
+            alert("Failed to extract article:", err);
         }
     }, 2000);
 
 } else {
-    console.log("Article content scraping canceled by user.");
+    alert("Article content scraping canceled by user.");
 }

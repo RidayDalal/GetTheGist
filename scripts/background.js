@@ -8,18 +8,25 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       try {
         console.log("Received summarization request");
         const summary = await getLlamaSummary(request.content);
-        console.log("Summary generated:", summary);
+        //console.log("Summary generated:", summary);
         sendResponse({ success: true, summary });
       } catch (error) {
-        console.error("Error during summarization:", error);
-        sendResponse({ 
-          success: false, 
-          summary: "Error during summarization: " + error.message 
-        });
+        //console.error("Error during summarization:", error);
+        // sendResponse({ 
+        //   success: false, 
+        //   summary: "Error during summarization: " + error.message 
+        // });
+        sendResponse({ summary: null });
       }
     })();
-    
+
     // Return true to indicate we will respond asynchronously
     return true;
+  }
+
+  if (request.type === "openPopupPage") {
+    chrome.tabs.create({
+      url: chrome.runtime.getURL("popup.html")
+    });
   }
 });
