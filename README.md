@@ -1,6 +1,6 @@
 # Get The Gist! - News Summarizer Chrome Extension
 
-A Chrome extension that automatically summarizes lengthy news articles from LiveMint and New York Times. When visiting supported news sites, the extension prompts users to generate a 200-word summary with bullet points covering key aspects of the article.
+Skip the scrolling and use GetTheGist, a Chrome extension that automatically summarizes those endlessly long news articles into a 200-word summary with bullet points covering key aspects of the article. This will help you to digest everyday current affairs, along with that morning coffee!
 
 ### Features
 - Extracts article content using [Mozilla's Readability library](https://github.com/mozilla/readability/tree/main)
