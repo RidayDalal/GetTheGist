@@ -1,7 +1,4 @@
-export async function getLlamaSummary(text) {
-    // Here, exposing the API key is ok as the model is a free model with unlimited prompts per day.
-    const API_KEY = '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';
-
+export async function getLlamaSummary(text, API_KEY) {
     // Create a prompt and send it to Meta Llama for generating 200 word summary
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",

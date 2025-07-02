@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "chrome extension",
+  "name": "GetTheGist",
   "description": "Runs a script when the user clicks the action toolbar icon.",
   "version": "1.0",
   "permissions": ["scripting", "activeTab", "storage", "tabs"],

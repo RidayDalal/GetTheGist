@@ -7,7 +7,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     (async () => {
       try {
         console.log("Received summarization request");
-        const summary = await getLlamaSummary(request.content);
+        const summary = await getLlamaSummary(request.content, request.apiKey);
         sendResponse({ success: true, summary });
       } catch (error) {
         //console.error("Error during summarization:", error);
