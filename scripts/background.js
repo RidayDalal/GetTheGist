@@ -17,8 +17,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     (async () => {
       try {
         console.log("Received summarization request");
-        const summary = await getLlamaSummary(request.content, request.apiKey);
-        sendResponse({ success: true, summary });
+        const mode = request.summaryMode === "voice" ? "voice" : "text";
+        const { summary, narration } = await getLlamaSummary(
+          request.content,
+          request.apiKey,
+          mode
+        );
+        sendResponse({ success: true, summary, narration });
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         console.error("Summarization failed:", message);

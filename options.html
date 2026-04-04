@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GetTheGist — API key</title>
+  <link rel="stylesheet" href="options.css" />
+</head>
+<body>
+  <div class="wrap">
+    <h1>OpenRouter API key</h1>
+    <p class="lead">
+      Paste your key from <a href="https://openrouter.ai/keys" target="_blank" rel="noopener">openrouter.ai/keys</a>.
+      It is stored only in this browser profile.
+    </p>
+    <label for="apiKey">API key</label>
+    <input id="apiKey" type="password" autocomplete="off" spellcheck="false" placeholder="sk-or-…" />
+    <div class="row">
+      <button type="button" id="save">Save</button>
+      <button type="button" id="toggleVisibility" class="secondary">Show</button>
+    </div>
+    <p id="status" class="status" role="status"></p>
+    <p id="hint" class="hint"></p>
+  </div>
+  <script src="scripts/options.js"></script>
+</body>
+</html>

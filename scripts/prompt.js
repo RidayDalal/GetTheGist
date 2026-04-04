@@ -8,17 +8,63 @@ const MODEL_CHAIN = [
     "meta-llama/llama-3.3-8b-instruct:free"
 ];
 
-function buildUserContent(text) {
-    const body =
-        text.length > MAX_INPUT_CHARS
-            ? text.slice(0, MAX_INPUT_CHARS) +
-              "\n\n[Article truncated for length.]"
-            : text;
+const BULLETS_HEADER = /###\s*BULLETS\s*###/gi;
+const NARR_SPLIT = /###\s*NARRATION\s*###/i;
+
+function truncateArticle(text) {
+    if (text.length <= MAX_INPUT_CHARS) return text;
     return (
-        "You are a helpful assistant that summarizes web articles.\n\n" +
-        "Summarize this content in 200 words with bullet points covering key points in article:\n\n" +
-        body
+        text.slice(0, MAX_INPUT_CHARS) + "\n\n[Article truncated for length.]"
     );
+}
+
+function buildPromptTextOnly(articleBody) {
+    return (
+        "You summarize news articles for a browser extension.\n\n" +
+        "Output ONLY bullet points. Each non-empty line must start with \"- \" or \"* \" (dash or asterisk, then a space).\n" +
+        "Do not write an introduction, closing paragraph, or phrases like \"Here is a summary\". Start directly with the first bullet.\n" +
+        "Aim for about 200 words total across all bullets. Cover the main facts, who, what, when, and why.\n\n" +
+        "Article:\n\n" +
+        articleBody
+    );
+}
+
+function buildPromptVoiceOver(articleBody) {
+    return (
+        "You summarize news articles for a browser extension. The user will see bullet points on screen but hear a shorter, separate script read aloud.\n\n" +
+        "You MUST output exactly two sections, in this order, using these exact header lines (including the ### marks):\n\n" +
+        "###BULLETS###\n" +
+        "Then bullet points only: each line starts with \"- \" or \"* \". About 200 words total. No intro or outro lines outside bullets.\n\n" +
+        "###NARRATION###\n" +
+        "Then a SHORTER piece of continuous prose for text-to-speech only: one or two short paragraphs, full sentences, natural and cohesive like a brief radio story. " +
+        "No bullet characters, no markdown, no list formatting, no headers, no quotation marks around the whole thing. " +
+        "Cover the same facts as the bullets but do not read the bullet list verbatim—rewrite for listening.\n\n" +
+        "Article:\n\n" +
+        articleBody
+    );
+}
+
+function parseVoiceOverResponse(raw) {
+    const text = String(raw).trim();
+    const narrParts = text.split(NARR_SPLIT);
+    const head = (narrParts[0] || "").trim();
+    const narration =
+        narrParts.length > 1
+            ? narrParts.slice(1).join("").trim() || null
+            : null;
+
+    let bullets = head.replace(BULLETS_HEADER, "").trim();
+    if (!bullets) {
+        bullets = head;
+    }
+    if (!bullets) {
+        bullets = text;
+    }
+
+    return {
+        bullets,
+        narration: narration && narration.length > 0 ? narration : null
+    };
 }
 
 function describeFailure(data, response) {
@@ -49,7 +95,7 @@ function describeFailure(data, response) {
     return parts.join(" | ");
 }
 
-async function requestCompletion(API_KEY, userContent) {
+async function requestCompletion(API_KEY, userContent, maxTokens) {
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -61,7 +107,7 @@ async function requestCompletion(API_KEY, userContent) {
         body: JSON.stringify({
             models: MODEL_CHAIN,
             messages: [{ role: "user", content: userContent }],
-            max_tokens: 1024
+            max_tokens: maxTokens
         })
     });
 
@@ -102,15 +148,25 @@ function shouldRetry(message) {
     );
 }
 
-export async function getLlamaSummary(text, API_KEY) {
-    const userContent = buildUserContent(text);
+/**
+ * @param {"text" | "voice"} mode - text: bullets only; voice: bullets + spoken script
+ * @returns {{ summary: string, narration: string | null }}
+ */
+export async function getLlamaSummary(text, API_KEY, mode = "text") {
+    const articleBody = truncateArticle(text);
+    const userContent =
+        mode === "voice" ? buildPromptVoiceOver(articleBody) : buildPromptTextOnly(articleBody);
+    const maxTokens = mode === "voice" ? 1536 : 1024;
+
     let lastError;
+    let rawContent = "";
     for (let attempt = 0; attempt < 2; attempt++) {
         if (attempt > 0) {
             await new Promise((r) => setTimeout(r, 2000));
         }
         try {
-            return await requestCompletion(API_KEY, userContent);
+            rawContent = await requestCompletion(API_KEY, userContent, maxTokens);
+            break;
         } catch (e) {
             const message = e instanceof Error ? e.message : String(e);
             lastError = e instanceof Error ? e : new Error(message);
@@ -120,5 +176,14 @@ export async function getLlamaSummary(text, API_KEY) {
             throw lastError;
         }
     }
-    throw lastError;
+
+    if (mode === "voice") {
+        const { bullets, narration } = parseVoiceOverResponse(rawContent);
+        if (!bullets.trim()) {
+            throw new Error("Model returned empty bullet section.");
+        }
+        return { summary: bullets.trim(), narration };
+    }
+
+    return { summary: String(rawContent).trim(), narration: null };
 }

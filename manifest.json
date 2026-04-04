@@ -24,6 +24,7 @@
   "icons": {
     "16": "image.png"
   },
+  "options_page": "options.html",
   "action": {
     "default_title": "chrome extension"
   }, 

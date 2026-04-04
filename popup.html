@@ -2,12 +2,44 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Summary</title>
   <link rel="stylesheet" href="popup.css" />
 </head>
 <body>
-  <div id="container">
-    <h1>News Summary</h1>
-    <div id="summaryText"></div>
+  <div class="page">
+    <header class="header">
+      <p class="eyebrow">GetTheGist</p>
+      <h1 class="title" id="articleTitle"></h1>
+      <p class="summary-label">(Summary)</p>
+    </header>
+
+    <article class="card">
+      <div
+        id="narrationBar"
+        class="narration-bar"
+        role="region"
+        aria-label="Summary audio"
+        hidden
+      >
+        <div class="narration-bar-inner">
+          <span class="narration-label">Listen</span>
+          <div class="narration-actions">
+            <button type="button" id="narrationPlay" class="narration-btn primary">
+              Play
+            </button>
+            <button type="button" id="narrationPause" class="narration-btn" disabled>
+              Pause
+            </button>
+            <button type="button" id="narrationStop" class="narration-btn" disabled>
+              Stop
+            </button>
+          </div>
+        </div>
+        <p id="narrationStatus" class="narration-status" aria-live="polite"></p>
+      </div>
+      <div id="summaryText" class="summary-body" aria-live="polite"></div>
+    </article>
   </div>
   <script src="scripts/popup.js"></script>
 </body>
